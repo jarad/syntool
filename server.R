@@ -1,3 +1,5 @@
+d = read.csv("zimbabwe-measles.csv")
+
 shinyServer(function(input, output) {
   output$contents <- renderTable({
     
@@ -8,9 +10,8 @@ shinyServer(function(input, output) {
 
     inFile <- input$file1
 
-    if (is.null(inFile))
-      return(NULL)
-    
+    if (is.null(inFile)) return(d)
+          
     read.csv(inFile$datapath)
   })
 })
