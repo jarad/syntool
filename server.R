@@ -18,7 +18,7 @@ shinyServer(function(input, output) {
 
   output$aggregate <- renderUI({
     nms = setdiff(names(raw()), c("cases","date"))
-    checkboxGroupInput("aggregate", "Aggregate by", nms)
+    checkboxGroupInput("aggregate", "Aggregate by", nms, nms)
   }) 
 
   aggregated = reactive({    
