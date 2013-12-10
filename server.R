@@ -7,12 +7,17 @@ shinyServer(function(input, output) {
 
   raw <- reactive({
     inFile <- input$file1
-    if (is.null(inFile)) return(d)
-    read.csv(inFile$datapath)
+    if (!is.null(inFile)) {
+      d = read.csv(inFile$datapath)
+      if (is.null(d$cases)) d$cases = 1
+    }
+    
+    return(d)
   }) 
 
+
   output$aggregate <- renderUI({
-    nms = setdiff(names(raw()),c("cases","date"))
+    nms = setdiff(names(raw()), c("cases","date"))
     checkboxGroupInput("aggregate", "Aggregate by", nms)
   }) 
 
@@ -23,6 +28,19 @@ shinyServer(function(input, output) {
     ddply(d, setdiff(names(d), c(input$aggregate,"cases")), summarize, cases=sum(cases))
   })
 
+
+
+  # Data output  
+  output$data <- renderTable({
+    d = aggregated()
+    d$date = as.character(d$date)
+    d
+  })
+
+
+
+
+  # Visualization 
   output$color = renderUI({
     nms = setdiff(names(aggregated()), c("cases","date"))
     selectInput('color', 'Color', c("None", nms))
@@ -37,6 +55,8 @@ shinyServer(function(input, output) {
     nms = setdiff(names(aggregated()), c("cases","date"))
     selectInput('facet_col', 'Facet Column', c(None='.', nms))
   })
+
+
 
   output$visualize <- renderPlot({
     d = aggregated()
@@ -54,16 +74,18 @@ shinyServer(function(input, output) {
     print(p)
   })
 
-  output$contents <- renderTable({
-    
-    # input$file1 will be NULL initially. After the user selects and uploads a 
-    # file, it will be a data frame with 'name', 'size', 'type', and 'datapath' 
-    # columns. The 'datapath' column will contain the local filenames where the 
-    # data can be found.
 
+  # Detection
+  output$detection = renderPlot({
+    require(qcc)
     d = aggregated()
-    d$date = as.character(d$date)
-    d
+    qcc(d, sizes=d$cases, type="g")
+  })
+
+
+  # Help
+  output$help = renderText({
+    "This is a prototype for a syndromic surveillance visualization tool. You should be able to upload your data in the DATA tab using a csv file format. The csv file should have the following columns: date (YYYY-MM-DD)."
   })
 })
 

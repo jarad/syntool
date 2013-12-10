@@ -1,21 +1,29 @@
 shinyUI(pageWithSidebar(
-  headerPanel("Syndromic surveillance"),
+
+  headerPanel("Syndromic surveillance visualization tool"),
 
   sidebarPanel(
-    fileInput('file1', 'Choose CSV File',
-              accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
+    conditionalPanel(condition="input.conditionedPanels==1",
+      fileInput('file1', 'Choose CSV File',
+                accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
 
-    uiOutput("aggregate"),
+      uiOutput("aggregate")
+    ),
 
-    uiOutput("color"),
-    uiOutput("facet_row"),
-    uiOutput("facet_col")    
+    conditionalPanel(condition="input.conditionedPanels==2",
+      uiOutput("color"),
+      uiOutput("facet_row"),
+      uiOutput("facet_col")
+    )
   ),
 
   mainPanel(
     tabsetPanel(
-      tabPanel("Data", tableOutput('contents')),
-      tabPanel("Visualize", plotOutput("visualize"))
+      tabPanel("Data",      value=1, tableOutput("data"    )),
+      tabPanel("Visualize", value=2, plotOutput("visualize")),
+      tabPanel("Detection", value=3, plotOutput("detection")),
+      tabPanel("Help",      value=4, textOutput("help")),
+      id = "conditionedPanels"
     )
   )
 ))
