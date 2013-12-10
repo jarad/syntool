@@ -61,6 +61,11 @@ shinyServer(function(input, output) {
   output$visualize <- renderPlot({
     d = aggregated()
 
+    if (input$style=="sum") {
+      nms = setdiff(names(d), c("cases","date"))
+      d = ddply(d, nms, transform, cases=cumsum(cases))
+    }
+
     p <- ggplot(d, aes(x=date, y=cases)) + geom_point()
     if (input$color != 'None')
       p <- p + aes_string(color=input$color)
